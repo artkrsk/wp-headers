@@ -70,6 +70,7 @@ export function patchTgmVersion(
   let openPos = arrayStart
   if (openerChar === '(') {
     openPos = content.indexOf('(', arrayStart)
+    /* v8 ignore next 3 */
     if (openPos === -1) {
       return content
     }

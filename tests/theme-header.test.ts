@@ -156,6 +156,18 @@ describe('buildThemeHeader', () => {
     expect(result).toContain('Text Domain: custom-domain')
   })
 
+  it('falls back to empty theme fields when wp key is missing', () => {
+    const result = buildThemeHeader({
+      pkg: { version: '1.0.0' },
+      slug: 'my-theme',
+    })
+
+    expect(result).toContain('Theme Name: My Theme')
+    expect(result).toContain('Version: 1.0.0')
+    expect(result).toContain('Text Domain: my-theme')
+    expect(result).not.toContain('Theme URI:')
+  })
+
   it('respects field order per WP conventions', () => {
     const result = buildThemeHeader({
       pkg: {

@@ -125,6 +125,18 @@ describe('buildPluginHeader', () => {
     expect(result).toContain('Text Domain: custom-domain')
   })
 
+  it('falls back to empty plugin fields when wp key is missing', () => {
+    const result = buildPluginHeader({
+      pkg: { version: '1.0.0' },
+      slug: 'my-plugin',
+    })
+
+    expect(result).toContain('Plugin Name: My Plugin')
+    expect(result).toContain('Version: 1.0.0')
+    expect(result).toContain('Text Domain: my-plugin')
+    expect(result).not.toContain('Plugin URI:')
+  })
+
   it('respects field order per WP conventions', () => {
     const result = buildPluginHeader({
       pkg: {

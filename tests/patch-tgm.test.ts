@@ -336,6 +336,45 @@ describe('patchTgmVersion', () => {
     expect(result).toBe(content)
   })
 
+  // ── Bare parentheses (not array()) ──────────────────────────────────
+
+  it('handles slug inside bare () without array keyword', () => {
+    const content = `register_plugins(
+  'slug' => 'my-plugin',
+  'version' => '1.0.0',
+)`
+
+    const result = patchTgmVersion(content, 'my-plugin', '2.0.0')
+
+    expect(result).toContain("'version' => '2.0.0'")
+  })
+
+  // ── Nested brackets in backward walk ──────────────────────────────
+
+  it('handles nested [] values when walking backwards to find enclosing array', () => {
+    const content = `[
+  'options' => ['a', 'b'],
+  'slug' => 'my-plugin',
+  'version' => '1.0.0',
+]`
+
+    const result = patchTgmVersion(content, 'my-plugin', '3.0.0')
+
+    expect(result).toContain("'version' => '3.0.0'")
+    expect(result).toContain("'options' => ['a', 'b']")
+  })
+
+  // ── Slug outside any array structure ──────────────────────────────
+
+  it('returns content unchanged when slug is not inside an array', () => {
+    const content = `'slug' => 'my-plugin'
+'version' => '1.0.0'`
+
+    const result = patchTgmVersion(content, 'my-plugin', '2.0.0')
+
+    expect(result).toBe(content)
+  })
+
   // ── Full real-world Velum TGM file ───────────────────────────────────
 
   it('patches the real Velum TGM format correctly', () => {
