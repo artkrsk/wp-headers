@@ -51,7 +51,7 @@ export function buildReadmeHeader(options) {
         lines.push(`License URI: ${fields.licenseUri}`);
     }
     lines.push('');
-    return lines.join('\n');
+    return lines.join('\n') + '\n';
 }
 /**
  * Replace the header block in an existing readme.txt file.

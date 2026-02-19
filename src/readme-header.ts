@@ -69,7 +69,7 @@ export function buildReadmeHeader(options: ReadmeHeaderOptions): string {
   }
 
   lines.push('')
-  return lines.join('\n')
+  return lines.join('\n') + '\n'
 }
 
 /**
