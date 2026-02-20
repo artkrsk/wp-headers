@@ -58,6 +58,8 @@ Running `processMapping({ type: 'theme', slug: 'flavor', entityDir: '/path/to/th
  * Text Domain: flavor
  * Tags: blog, one-column
  */
+
+/* ---- This file is intentionally blank. Styles live in Sass source. ---- */
 ```
 
 ### Plugin: `package.json` → PHP header
@@ -88,6 +90,7 @@ Given this in your plugin's `package.json`:
 Running `processMapping({ type: 'plugin', slug: 'flavor-core', entityDir: '/path/to/plugin' })` generates or updates the header at the top of `flavor-core.php`:
 
 ```php
+<?php
 /**
  * Plugin Name: Flavor Core
  * Plugin URI: https://example.com/flavor-core
@@ -101,6 +104,8 @@ Running `processMapping({ type: 'plugin', slug: 'flavor-core', entityDir: '/path
  * License: GPL-2.0-or-later
  * Text Domain: flavor-core
  */
+
+defined( 'ABSPATH' ) || exit;
 ```
 
 ### TGM version patching
@@ -124,8 +129,8 @@ function flavor_tgm_register_required_plugins() {
             'version'  => '1.0.0',
         ),
         array(
-            'name'     => 'Flavor Elementor',
-            'slug'     => 'flavor-elementor',
+            'name'     => 'Flavor Elementor Extension',
+            'slug'     => 'flavor-elementor-extension',
             'source'   => esc_url( $elementor_plugin_url ),
             'required' => true,
             'version'  => '1.0.0',
