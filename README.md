@@ -105,25 +105,44 @@ Running `processMapping({ type: 'plugin', slug: 'flavor-core', entityDir: '/path
 
 ### TGM version patching
 
-When a plugin's `package.json` includes `wp.plugin.loadPluginsFile`, the tool also patches version strings inside TGM-style PHP arrays. Given this PHP file registered via `tgmBasePath`:
+WordPress themes commonly use TGMPA to register required plugins with minimum version constraints. When a plugin's `package.json` includes `wp.plugin.loadPluginsFile`, the tool finds the matching slug in the TGM PHP file and patches its version string.
+
+Given this TGM registration file in your theme:
 
 ```php
-$plugins = array(
-    array(
-        'name'     => 'Flavor Core',
-        'slug'     => 'flavor-core',
-        'version'  => '1.0.0',
-    ),
-);
+<?php
+
+add_action( 'tgmpa_register', 'flavor_tgm_register_required_plugins' );
+function flavor_tgm_register_required_plugins() {
+    $plugins = array(
+        array(
+            'name'     => 'Flavor Core',
+            'slug'     => 'flavor-core',
+            'source'   => esc_url( $core_plugin_url ),
+            'required' => true,
+            'version'  => '1.0.0',
+        ),
+        array(
+            'name'     => 'Flavor Elementor',
+            'slug'     => 'flavor-elementor',
+            'source'   => esc_url( $elementor_plugin_url ),
+            'required' => true,
+            'version'  => '1.0.0',
+        ),
+    );
+
+    tgmpa( $plugins, $config );
+}
 ```
 
-After processing with `version: "2.0.0"` in `package.json`, the version field is updated in place:
+When `flavor-core`'s `package.json` has `"version": "2.0.0"`, processing updates only the matching entry:
 
-```php
-        'version'  => '2.0.0',
+```diff
+-            'version'  => '1.0.0',
++            'version'  => '2.0.0',
 ```
 
-Whitespace alignment, quote styles, and other entries are preserved.
+Whitespace alignment, quote styles, nested function calls, and other plugin entries are preserved.
 
 ## Usage
 
