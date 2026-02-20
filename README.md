@@ -10,7 +10,7 @@ npm install @artemsemkin/wp-headers
 
 ## What it does
 
-Reads `wp.theme` or `wp.plugin` fields from a `package.json` and writes properly formatted WordPress header comments to the corresponding files (`style.css`, plugin PHP, `readme.txt`). Also patches version strings in TGM-style plugin arrays.
+Reads `wp.theme` or `wp.plugin` fields from a `package.json` and generates or updates WordPress header comments in target files (`style.css`, plugin PHP, `readme.txt`). If a file already contains a header comment, it replaces it in place. If not, it writes a new one. Also patches version strings in TGM-style PHP plugin arrays.
 
 ## Examples
 
@@ -85,7 +85,7 @@ Given this in your plugin's `package.json`:
 }
 ```
 
-Running `processMapping({ type: 'plugin', slug: 'flavor-core', entityDir: '/path/to/plugin' })` generates this at the top of `flavor-core.php`:
+Running `processMapping({ type: 'plugin', slug: 'flavor-core', entityDir: '/path/to/plugin' })` generates or updates the header at the top of `flavor-core.php`:
 
 ```php
 /**
@@ -103,6 +103,28 @@ Running `processMapping({ type: 'plugin', slug: 'flavor-core', entityDir: '/path
  */
 ```
 
+### TGM version patching
+
+When a plugin's `package.json` includes `wp.plugin.loadPluginsFile`, the tool also patches version strings inside TGM-style PHP arrays. Given this PHP file registered via `tgmBasePath`:
+
+```php
+$plugins = array(
+    array(
+        'name'     => 'Flavor Core',
+        'slug'     => 'flavor-core',
+        'version'  => '1.0.0',
+    ),
+);
+```
+
+After processing with `version: "2.0.0"` in `package.json`, the version field is updated in place:
+
+```php
+        'version'  => '2.0.0',
+```
+
+Whitespace alignment, quote styles, and other entries are preserved.
+
 ## Usage
 
 ```ts
@@ -112,10 +134,10 @@ processMapping({
   type: 'plugin',
   slug: 'my-plugin',
   entityDir: '/path/to/plugin',
-  tgmBasePath: '/path/to/theme/src/php', // optional: patches TGM version arrays
+  tgmBasePath: '/path/to/theme/src/php',
 })
 ```
 
 ## Vite integration
 
-Use [`@artemsemkin/vite-plugin-wp-headers`](https://github.com/artkrsk/vite-plugin-wp-headers) to run header generation during Vite's build lifecycle and watch for changes during dev.
+Use [`@artemsemkin/vite-plugin-wp-headers`](https://www.npmjs.com/package/@artemsemkin/vite-plugin-wp-headers) to automate header generation during Vite's build lifecycle and watch for changes during dev.
