@@ -130,6 +130,18 @@ describe('replaceComment', () => {
     expect(result!.startsWith('<?php\n')).toBe(true)
     expect(result).toContain('code();')
   })
+
+  it('is idempotent — repeated replacements do not add extra blank lines', () => {
+    const original = `<?php\n/*\nPlugin Name: Test\nVersion: 1.0.0\n*/\n\nif ( true ) {}\n`
+    const comment = `/*\nPlugin Name: Test\nVersion: 2.0.0\n*/\n`
+
+    const first = replaceComment(original, comment)!
+    const second = replaceComment(first, comment)!
+    const third = replaceComment(second, comment)!
+
+    expect(second).toBe(first)
+    expect(third).toBe(first)
+  })
 })
 
 describe('replaceReadmeBlock', () => {

@@ -26,7 +26,8 @@ export function replaceComment(content, newComment) {
     if (endIdx === -1) {
         return null;
     }
-    return content.slice(0, startIdx) + newComment + content.slice(endIdx + 2);
+    const after = content.slice(endIdx + 2).replace(/^\n*/, '');
+    return content.slice(0, startIdx) + newComment + '\n' + after;
 }
 /** Replace the `=== ... ===` header block in content. Returns `null` if not found. */
 export function replaceReadmeBlock(content, newBlock) {
