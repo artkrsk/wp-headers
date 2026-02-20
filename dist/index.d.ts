@@ -5,3 +5,5 @@ export type { PluginHeaderConfig, PluginReadmeConfig } from './wp-plugin.js';
 export { wpPluginHeader, wpPluginReadme, pluginHeaderFromPkg, pluginReadmeFromPkg } from './wp-plugin.js';
 export { titleCase, deriveName } from './wp-helpers.js';
 export { patchTgmVersion } from './patch-tgm.js';
+export type { HeaderMapping } from './process.js';
+export { readText, processMapping } from './process.js';

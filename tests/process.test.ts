@@ -4,8 +4,8 @@ vi.mock('node:fs')
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import type { HeaderMapping } from '../src/vite-plugin'
-import { wpHeaders } from '../src/vite-plugin'
+import type { HeaderMapping } from '../src/process'
+import { processMapping } from '../src/process'
 
 const mockedExistsSync = vi.mocked(existsSync)
 const mockedReadFileSync = vi.mocked(readFileSync)
@@ -32,12 +32,6 @@ function makeMapping(overrides?: Partial<HeaderMapping>): HeaderMapping {
     tgmBasePath: '/fake/tgm',
     ...overrides,
   }
-}
-
-/** Trigger processMapping via the plugin's configResolved hook */
-function runPlugin(mappings: HeaderMapping[]): void {
-  const plugin = wpHeaders(mappings) as { configResolved: () => void }
-  plugin.configResolved()
 }
 
 function setupFs(files: Record<string, string>): void {
@@ -70,7 +64,7 @@ describe('plugin PHP insert-when-missing', () => {
       [pluginPhpPath]: '<?php\n\nnamespace TestPlugin;\n\nclass Main {}\n',
     })
 
-    runPlugin([makeMapping()])
+    processMapping(makeMapping())
 
     const written = getWritten(pluginPhpPath)
     expect(written).not.toBeNull()
@@ -85,7 +79,7 @@ describe('plugin PHP insert-when-missing', () => {
       [pluginPhpPath]: '<?php\n',
     })
 
-    runPlugin([makeMapping()])
+    processMapping(makeMapping())
 
     const written = getWritten(pluginPhpPath)
     expect(written).toMatch(/^<\?php\n\/\*\n/)
@@ -98,7 +92,7 @@ describe('plugin PHP insert-when-missing', () => {
       [pluginPhpPath]: '<?php\n/*\nPlugin Name: Old\nVersion: 1.0.0\n*/\n\nclass Main {}\n',
     })
 
-    runPlugin([makeMapping()])
+    processMapping(makeMapping())
 
     const written = getWritten(pluginPhpPath)
     expect(written).toContain('Plugin Name: Test Plugin')
@@ -116,7 +110,7 @@ describe('BOM stripping', () => {
       [pluginPhpPath]: '\uFEFF<?php\n\necho "hello";\n',
     })
 
-    runPlugin([makeMapping()])
+    processMapping(makeMapping())
 
     const written = getWritten(pluginPhpPath)
     expect(written).not.toBeNull()
@@ -131,7 +125,7 @@ describe('BOM stripping', () => {
       [pluginPhpPath]: '\uFEFF<?php\n/*\nPlugin Name: Old\n*/\n\necho 1;\n',
     })
 
-    runPlugin([makeMapping()])
+    processMapping(makeMapping())
 
     const written = getWritten(pluginPhpPath)
     expect(written).toMatch(/^<\?php\n/)
@@ -148,7 +142,7 @@ describe('readme.txt insert-when-missing', () => {
       [readmePath]: 'Some existing content.\n\n== Description ==\n\nHello.\n',
     })
 
-    runPlugin([makeMapping()])
+    processMapping(makeMapping())
 
     const written = getWritten(readmePath)
     expect(written).not.toBeNull()
@@ -162,7 +156,7 @@ describe('readme.txt insert-when-missing', () => {
       [readmePath]: '=== Old Name ===\nStable tag: 1.0.0\n\n== Description ==\n\nHello.\n',
     })
 
-    runPlugin([makeMapping()])
+    processMapping(makeMapping())
 
     const written = getWritten(readmePath)
     expect(written).toContain('=== Test Plugin ===')

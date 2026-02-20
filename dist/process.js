@@ -5,10 +5,10 @@ import { patchTgmVersion } from './patch-tgm.js';
 import { themeStyleFromPkg, themeReadmeFromPkg, wpThemeStyle, wpThemeReadme } from './wp-theme.js';
 import { pluginHeaderFromPkg, pluginReadmeFromPkg, wpPluginHeader, wpPluginReadme } from './wp-plugin.js';
 /** Read a UTF-8 file, stripping BOM if present */
-function readText(filePath) {
+export function readText(filePath) {
     return readFileSync(filePath, 'utf-8').replace(/^\uFEFF/, '');
 }
-function processMapping(mapping) {
+export function processMapping(mapping) {
     const phpSrc = mapping.phpSrc ?? 'src/php';
     const pkgPath = resolve(mapping.entityDir, 'package.json');
     if (!existsSync(pkgPath)) {
@@ -75,35 +75,4 @@ function processMapping(mapping) {
             }
         }
     }
-}
-/**
- * Vite plugin that generates WordPress file headers (style.css, plugin PHP)
- * and patches TGM version entries on build and during dev server.
- */
-export function wpHeaders(mappings) {
-    return {
-        name: 'vite-plugin-wp-headers',
-        configResolved() {
-            for (const mapping of mappings) {
-                processMapping(mapping);
-            }
-        },
-        configureServer(server) {
-            for (const mapping of mappings) {
-                const pkgPath = resolve(mapping.entityDir, 'package.json');
-                server.watcher.add(pkgPath);
-                server.watcher.on('change', (filePath) => {
-                    if (filePath !== pkgPath) {
-                        return;
-                    }
-                    try {
-                        processMapping(mapping);
-                    }
-                    catch (err) {
-                        server.config.logger.error(String(err));
-                    }
-                });
-            }
-        },
-    };
 }

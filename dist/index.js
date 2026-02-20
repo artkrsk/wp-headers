@@ -6,3 +6,4 @@ export { wpPluginHeader, wpPluginReadme, pluginHeaderFromPkg, pluginReadmeFromPk
 export { titleCase, deriveName } from './wp-helpers.js';
 // TGM
 export { patchTgmVersion } from './patch-tgm.js';
+export { readText, processMapping } from './process.js';

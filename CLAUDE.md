@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-A TypeScript library (`@arts/wp-headers`) that generates and patches WordPress file headers. Layered architecture separates pure string I/O from WordPress conventions and integration plugins.
+A TypeScript library (`@artemsemkin/wp-headers`) that generates and patches WordPress file headers. Layered architecture separates pure string I/O from WordPress conventions.
 
 Produces:
 - **style.css** theme headers (WordPress `class-wp-theme.php` field order)
@@ -12,12 +12,10 @@ Produces:
 - **readme.txt** header blocks (`=== Name ===` format for WordPress.org)
 - **TGM version patches** (updates version strings inside TGM-style PHP plugin arrays)
 
-Also ships a Vite plugin (`@arts/wp-headers/vite`) that runs header generation on `configResolved` and watches `package.json` changes during dev.
-
 ## Commands
 
 ```bash
-pnpm build          # tsc -p tsconfig.build.json → dist/
+pnpm build          # tsc -p tsconfig.build.json -> dist/
 pnpm test           # vitest run (all tests)
 pnpm test:watch     # vitest in watch mode
 pnpm test:coverage  # vitest with v8 coverage
@@ -30,33 +28,31 @@ pnpm vitest run tests/core.test.ts
 
 ## Architecture
 
-ESM-only (`"type": "module"`). Two export paths:
-- `.` → `dist/index.ts` — pure functions for header generation
-- `./vite` → `dist/vite-plugin.ts` — Vite plugin that orchestrates file I/O
+ESM-only (`"type": "module"`). Single export path: `.` -> `dist/index.ts`.
 
 Three-layer architecture:
 
 ```
-Layer 3: Integration ── Vite plugin (file I/O, watchers)
-Layer 2: WordPress ──── Typed configs, field ordering, pkg.json adapters
-Layer 1: Core ───────── buildComment(), buildReadmeBlock(), replaceComment(), replaceReadmeBlock()
+Layer 3: Process ---- File I/O orchestration (processMapping)
+Layer 2: WordPress -- Typed configs, field ordering, pkg.json adapters
+Layer 1: Core ------- buildComment(), buildReadmeBlock(), replaceComment(), replaceReadmeBlock()
 ```
 
 | Module | Layer | Purpose |
 |---|---|---|
 | `core.ts` | 1 | Pure string serializers + replacers (no WP knowledge) |
-| `wp-helpers.ts` | 2 | `titleCase()`, `deriveName()` — shared utilities |
+| `wp-helpers.ts` | 2 | `titleCase()`, `deriveName()` -- shared utilities |
 | `wp-theme.ts` | 2 | Theme types, field builders (`wpThemeStyle`, `wpThemeReadme`), pkg adapters |
 | `wp-plugin.ts` | 2 | Plugin types, field builders (`wpPluginHeader`, `wpPluginReadme`), pkg adapters |
-| `patch-tgm.ts` | — | `patchTgmVersion()` — regex + depth-tracked bracket walking for TGM arrays |
-| `vite-plugin.ts` | 3 | `wpHeaders()` Vite plugin — composes layers 1+2 with file I/O |
+| `patch-tgm.ts` | -- | `patchTgmVersion()` -- regex + depth-tracked bracket walking for TGM arrays |
+| `process.ts` | 3 | `processMapping()` -- composes layers 1+2 with file I/O |
 
 ## Key Patterns
 
-- Layer 1 functions are pure string→string with no WordPress knowledge
+- Layer 1 functions are pure string->string with no WordPress knowledge
 - Layer 2 typed configs (`ThemeStyleConfig`, `PluginHeaderConfig`, etc.) enforce valid WP properties at the type level
-- Layer 2 field builders (`wpThemeStyle()`, etc.) convert typed configs → ordered `Record<string, string>`
-- Layer 2 pkg adapters (`themeStyleFromPkg()`, etc.) convert `package.json` → typed configs
+- Layer 2 field builders (`wpThemeStyle()`, etc.) convert typed configs -> ordered `Record<string, string>`
+- Layer 2 pkg adapters (`themeStyleFromPkg()`, etc.) convert `package.json` -> typed configs
 - Header field data comes from `pkg.wp.theme` or `pkg.wp.plugin` in package.json
 - Theme name is derived from `pkg.name` by stripping `@scope/` prefix and `-theme` suffix, then title-casing
 - Plugin name uses `wp.plugin.name` if set, otherwise title-cases the slug
@@ -68,9 +64,10 @@ Layer 1: Core ───────── buildComment(), buildReadmeBlock(), re
 ## Tests
 
 Tests live in `tests/` with vitest globals enabled:
-- `core.test.ts` — serializers + replacers
-- `wp-theme.test.ts` — theme field builders + pkg adapters (composed with core)
-- `wp-plugin.test.ts` — plugin field builders + pkg adapters (composed with core)
-- `patch-tgm.test.ts` — TGM version patching
+- `core.test.ts` -- serializers + replacers
+- `wp-theme.test.ts` -- theme field builders + pkg adapters (composed with core)
+- `wp-plugin.test.ts` -- plugin field builders + pkg adapters (composed with core)
+- `patch-tgm.test.ts` -- TGM version patching
+- `process.test.ts` -- processMapping file I/O orchestration
 
-Coverage is scoped to pure-function modules (excludes `vite-plugin.ts` and `index.ts`).
+Coverage is scoped to pure-function modules and process orchestration (excludes `index.ts`).

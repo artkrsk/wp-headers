@@ -1,20 +1,38 @@
 {
-  "name": "@arts/wp-headers",
-  "version": "1.0.0",
+  "name": "@artemsemkin/wp-headers",
+  "version": "1.1.0",
+  "description": "Generate and patch WordPress file headers (style.css, plugin PHP, readme.txt, TGM)",
+  "license": "MIT",
+  "author": "Artem Semkin",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/artkrsk/wp-headers.git"
+  },
+  "homepage": "https://github.com/artkrsk/wp-headers#readme",
+  "bugs": {
+    "url": "https://github.com/artkrsk/wp-headers/issues"
+  },
+  "keywords": [
+    "wordpress",
+    "headers",
+    "wp-headers",
+    "style-css",
+    "readme-txt",
+    "plugin-header"
+  ],
   "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    },
-    "./vite": {
-      "types": "./dist/vite-plugin.d.ts",
-      "default": "./dist/vite-plugin.js"
     }
   },
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "prepublishOnly": "pnpm build",
@@ -22,19 +40,10 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
   },
-  "peerDependencies": {
-    "vite": ">=5"
-  },
-  "peerDependenciesMeta": {
-    "vite": {
-      "optional": true
-    }
-  },
   "devDependencies": {
     "@types/node": "^25.3.0",
     "@vitest/coverage-v8": "3.2.4",
     "typescript": "^5.7.0",
-    "vite": "^7.0.0",
     "vitest": "^3.0.0"
   }
 }

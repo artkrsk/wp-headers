@@ -10,6 +10,7 @@ export default defineConfig({
         'src/wp-theme.ts',
         'src/wp-plugin.ts',
         'src/patch-tgm.ts',
+        'src/process.ts',
       ],
     },
   },

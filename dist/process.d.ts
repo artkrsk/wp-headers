@@ -1,4 +1,5 @@
-import type { Plugin } from 'vite';
+/** Read a UTF-8 file, stripping BOM if present */
+export declare function readText(filePath: string): string;
 export interface HeaderMapping {
     type: 'theme' | 'plugin';
     slug: string;
@@ -8,8 +9,4 @@ export interface HeaderMapping {
     /** Subdirectory within entityDir containing PHP source files */
     phpSrc?: string;
 }
-/**
- * Vite plugin that generates WordPress file headers (style.css, plugin PHP)
- * and patches TGM version entries on build and during dev server.
- */
-export declare function wpHeaders(mappings: HeaderMapping[]): Plugin;
+export declare function processMapping(mapping: HeaderMapping): void;
