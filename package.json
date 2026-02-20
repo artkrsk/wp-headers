@@ -1,6 +1,6 @@
 {
   "name": "@artemsemkin/wp-headers",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Generate and patch WordPress file headers (style.css, plugin PHP, readme.txt, TGM)",
   "license": "MIT",
   "author": "Artem Semkin",

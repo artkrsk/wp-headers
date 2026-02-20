@@ -115,6 +115,7 @@ Given this TGM registration file in your theme:
 add_action( 'tgmpa_register', 'flavor_tgm_register_required_plugins' );
 function flavor_tgm_register_required_plugins() {
     $plugins = array(
+        // Bundled plugins — have a version constraint
         array(
             'name'     => 'Flavor Core',
             'slug'     => 'flavor-core',
@@ -129,13 +130,24 @@ function flavor_tgm_register_required_plugins() {
             'required' => true,
             'version'  => '1.0.0',
         ),
+        // Third-party plugins — no version field, pulled from wp.org
+        array(
+            'name'     => 'Elementor',
+            'slug'     => 'elementor',
+            'required' => true,
+        ),
+        array(
+            'name'     => 'Contact Form 7',
+            'slug'     => 'contact-form-7',
+            'required' => false,
+        ),
     );
 
     tgmpa( $plugins, $config );
 }
 ```
 
-When `flavor-core`'s `package.json` has `"version": "2.0.0"`, processing updates only the matching entry:
+When `flavor-core`'s `package.json` has `"version": "2.0.0"`, processing updates only the matching entry — the Elementor and Contact Form 7 entries are left untouched because they don't have a `version` field and their slugs don't match:
 
 ```diff
 -            'version'  => '1.0.0',
