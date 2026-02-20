@@ -1,11 +1,10 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import type { Plugin } from 'vite'
-import { buildPluginHeader } from './plugin-header.js'
-import { buildReadmeHeader, replaceReadmeHeader } from './readme-header.js'
-import { buildThemeHeader } from './theme-header.js'
+import { buildComment, buildReadmeBlock, replaceComment, replaceReadmeBlock } from './core.js'
 import { patchTgmVersion } from './patch-tgm.js'
-import { replacePluginFileHeader } from './replace-header.js'
+import { themeStyleFromPkg, themeReadmeFromPkg, wpThemeStyle, wpThemeReadme } from './wp-theme.js'
+import { pluginHeaderFromPkg, pluginReadmeFromPkg, wpPluginHeader, wpPluginReadme } from './wp-plugin.js'
 
 export interface HeaderMapping {
   type: 'theme' | 'plugin'
@@ -23,66 +22,66 @@ function processMapping(mapping: HeaderMapping): void {
   if (!existsSync(pkgPath)) {
     return
   }
-  const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8')) as Record<
-    string,
-    unknown
-  >
+  const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8')) as Record<string, unknown>
   const wp = (pkg['wp'] as Record<string, unknown> | undefined) ?? {}
 
   if (mapping.type === 'theme') {
     if (!wp['theme']) {
       return
     }
+
+    // style.css
+    const styleConfig = themeStyleFromPkg(pkg, mapping.slug)
     writeFileSync(
       resolve(mapping.entityDir, phpSrc, 'style.css'),
-      buildThemeHeader({ pkg, slug: mapping.slug }),
+      buildComment(wpThemeStyle(styleConfig)),
     )
 
-    // readme.txt sync (theme)
+    // readme.txt
     const themeReadmePath = resolve(mapping.entityDir, phpSrc, 'readme.txt')
     if (existsSync(themeReadmePath)) {
       const readmeContent = readFileSync(themeReadmePath, 'utf-8')
-      const newReadmeHeader = buildReadmeHeader({ pkg, slug: mapping.slug, type: 'theme' })
-      const replacedReadme = replaceReadmeHeader(readmeContent, newReadmeHeader)
-      if (replacedReadme !== null) {
-        writeFileSync(themeReadmePath, replacedReadme)
+      const readmeConfig = themeReadmeFromPkg(pkg, mapping.slug)
+      const block = buildReadmeBlock(readmeConfig.name, wpThemeReadme(readmeConfig))
+      const replaced = replaceReadmeBlock(readmeContent, block)
+      if (replaced !== null) {
+        writeFileSync(themeReadmePath, replaced)
       }
     }
   } else {
     if (!wp['plugin']) {
       return
     }
-    const plugin = wp['plugin'] as Record<string, unknown>
     const version = (pkg['version'] as string | undefined) ?? '1.0.0'
 
-    const pluginPhpPath = resolve(
-      mapping.entityDir,
-      phpSrc,
-      `${mapping.slug}.php`,
-    )
+    // Plugin PHP header
+    const pluginPhpPath = resolve(mapping.entityDir, phpSrc, `${mapping.slug}.php`)
     if (existsSync(pluginPhpPath)) {
       const content = readFileSync(pluginPhpPath, 'utf-8')
-      const replaced = replacePluginFileHeader(
-        content,
-        buildPluginHeader({ pkg, slug: mapping.slug }),
-      )
+      const headerConfig = pluginHeaderFromPkg(pkg, mapping.slug)
+      const comment = buildComment(wpPluginHeader(headerConfig))
+      const replaced = replaceComment(content, comment)
       if (replaced !== null) {
-        writeFileSync(pluginPhpPath, replaced)
+        const normalized = replaced.replace(/^\s*<\?(?:php|PHP)?\s*/, '')
+        writeFileSync(pluginPhpPath, `<?php\n${normalized.trimStart()}`)
       }
     }
 
-    // readme.txt sync (plugin)
+    // readme.txt
     const pluginReadmePath = resolve(mapping.entityDir, phpSrc, 'readme.txt')
     if (existsSync(pluginReadmePath)) {
       const readmeContent = readFileSync(pluginReadmePath, 'utf-8')
-      const newReadmeHeader = buildReadmeHeader({ pkg, slug: mapping.slug, type: 'plugin' })
-      const replacedReadme = replaceReadmeHeader(readmeContent, newReadmeHeader)
-      if (replacedReadme !== null) {
-        writeFileSync(pluginReadmePath, replacedReadme)
+      const readmeConfig = pluginReadmeFromPkg(pkg, mapping.slug)
+      const block = buildReadmeBlock(readmeConfig.name, wpPluginReadme(readmeConfig))
+      const replaced = replaceReadmeBlock(readmeContent, block)
+      if (replaced !== null) {
+        writeFileSync(pluginReadmePath, replaced)
       }
     }
 
-    const loadPluginsFile = plugin['loadPluginsFile'] as string | undefined
+    // TGM version patching
+    const pluginWp = wp['plugin'] as Record<string, unknown>
+    const loadPluginsFile = pluginWp['loadPluginsFile'] as string | undefined
     if (loadPluginsFile && mapping.tgmBasePath) {
       const tgmFilePath = resolve(mapping.tgmBasePath, loadPluginsFile)
       if (existsSync(tgmFilePath)) {

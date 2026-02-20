@@ -1,8 +1,7 @@
-export { buildThemeHeader } from './theme-header.js';
-export type { ThemeHeaderFields, ThemeHeaderOptions } from './theme-header.js';
-export { buildPluginHeader } from './plugin-header.js';
-export type { PluginHeaderFields, PluginHeaderOptions } from './plugin-header.js';
-export { replacePluginFileHeader } from './replace-header.js';
-export { buildReadmeHeader, replaceReadmeHeader } from './readme-header.js';
-export type { ReadmeHeaderOptions } from './readme-header.js';
+export { buildComment, buildReadmeBlock, replaceComment, replaceReadmeBlock } from './core.js';
+export type { ThemeStyleConfig, ThemeReadmeConfig } from './wp-theme.js';
+export { wpThemeStyle, wpThemeReadme, themeStyleFromPkg, themeReadmeFromPkg } from './wp-theme.js';
+export type { PluginHeaderConfig, PluginReadmeConfig } from './wp-plugin.js';
+export { wpPluginHeader, wpPluginReadme, pluginHeaderFromPkg, pluginReadmeFromPkg } from './wp-plugin.js';
+export { titleCase, deriveName } from './wp-helpers.js';
 export { patchTgmVersion } from './patch-tgm.js';

@@ -5,9 +5,10 @@ export default defineConfig({
     globals: true,
     coverage: {
       include: [
-        'src/theme-header.ts',
-        'src/plugin-header.ts',
-        'src/replace-header.ts',
+        'src/core.ts',
+        'src/wp-helpers.ts',
+        'src/wp-theme.ts',
+        'src/wp-plugin.ts',
         'src/patch-tgm.ts',
       ],
     },
