@@ -2,9 +2,9 @@
 export function buildComment(fields) {
     const lines = ['/*'];
     for (const [key, value] of Object.entries(fields)) {
-        lines.push(`${key}: ${value}`);
+        lines.push(` * ${key}: ${value}`);
     }
-    lines.push('*/');
+    lines.push(' */');
     return lines.join('\n') + '\n';
 }
 /** Serialize a titled readme header block: `=== Title ===\n\nKey: Value\n\n` */

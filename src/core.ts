@@ -2,9 +2,9 @@
 export function buildComment(fields: Record<string, string>): string {
   const lines: string[] = ['/*']
   for (const [key, value] of Object.entries(fields)) {
-    lines.push(`${key}: ${value}`)
+    lines.push(` * ${key}: ${value}`)
   }
-  lines.push('*/')
+  lines.push(' */')
   return lines.join('\n') + '\n'
 }
 

@@ -9,7 +9,7 @@ describe('buildComment', () => {
       'Text Domain': 'velum',
     })
 
-    expect(result).toBe('/*\nTheme Name: Velum\nVersion: 2.0.0\nText Domain: velum\n*/\n')
+    expect(result).toBe('/*\n * Theme Name: Velum\n * Version: 2.0.0\n * Text Domain: velum\n */\n')
   })
 
   it('preserves iteration order', () => {
@@ -23,7 +23,7 @@ describe('buildComment', () => {
     const lines = result.split('\n')
     const fieldOrder = lines
       .filter((l) => l.includes(':'))
-      .map((l) => l.split(':')[0].trim())
+      .map((l) => l.split(':')[0].replace(/^\s*\*\s*/, '').trim())
 
     expect(fieldOrder).toEqual(['Plugin Name', 'Description', 'Version', 'Author'])
   })
@@ -31,7 +31,7 @@ describe('buildComment', () => {
   it('wraps with /* and */ delimiters', () => {
     const result = buildComment({ 'Name': 'Test' })
     expect(result).toMatch(/^\/\*\n/)
-    expect(result).toMatch(/\*\/\n$/)
+    expect(result).toMatch(/ \*\/\n$/)
   })
 
   it('handles special characters in values', () => {
@@ -78,7 +78,7 @@ describe('buildReadmeBlock', () => {
 describe('replaceComment', () => {
   it('replaces standard /* ... */ header', () => {
     const content = `<?php\n/*\nPlugin Name: Old Name\nVersion: 1.0.0\n*/\n\nnamespace MyPlugin;\n\nclass Main {}\n`
-    const newComment = `/*\nPlugin Name: New Name\nVersion: 2.0.0\n*/\n`
+    const newComment = `/*\n * Plugin Name: New Name\n * Version: 2.0.0\n */\n`
     const result = replaceComment(content, newComment)
 
     expect(result).toContain('Plugin Name: New Name')
@@ -90,7 +90,7 @@ describe('replaceComment', () => {
 
   it('replaces /** ... */ docblock style header', () => {
     const content = `<?php\n/**\n * Plugin Name: Old Name\n * Version: 1.0.0\n */\n\nfunction init() {}\n`
-    const newComment = `/*\nPlugin Name: New Name\nVersion: 2.0.0\n*/\n`
+    const newComment = `/*\n * Plugin Name: New Name\n * Version: 2.0.0\n */\n`
     const result = replaceComment(content, newComment)
 
     expect(result).toContain('Plugin Name: New Name')
@@ -100,7 +100,7 @@ describe('replaceComment', () => {
 
   it('preserves code after header with blank lines', () => {
     const content = `<?php\n/*\nPlugin Name: Test\n*/\n\n\n\n// Important code\n$x = 1;\n`
-    const result = replaceComment(content, '/*\nNew\n*/\n')
+    const result = replaceComment(content, '/*\n * New\n */\n')
 
     expect(result).toContain('// Important code')
     expect(result).toContain('$x = 1;')
@@ -108,32 +108,32 @@ describe('replaceComment', () => {
 
   it('returns null when no opening /* found', () => {
     const content = `<?php\necho "hello";\n`
-    expect(replaceComment(content, '/*\nNew\n*/\n')).toBeNull()
+    expect(replaceComment(content, '/*\n * New\n */\n')).toBeNull()
   })
 
   it('returns null when no closing */ found', () => {
     const content = `<?php\n/* This comment is never closed\necho "hello";\n`
-    expect(replaceComment(content, '/*\nNew\n*/\n')).toBeNull()
+    expect(replaceComment(content, '/*\n * New\n */\n')).toBeNull()
   })
 
   it('handles file where */ appears at very end', () => {
     const content = `<?php\n/*\nPlugin Name: Test\n*/`
-    const result = replaceComment(content, '/*\nNew\n*/\n')
+    const result = replaceComment(content, '/*\n * New\n */\n')
 
     expect(result).toContain('New')
   })
 
   it('preserves content before the comment', () => {
     const content = `<?php\n/*\nOld\n*/\ncode();\n`
-    const result = replaceComment(content, '/*\nNew\n*/\n')
+    const result = replaceComment(content, '/*\n * New\n */\n')
 
     expect(result!.startsWith('<?php\n')).toBe(true)
     expect(result).toContain('code();')
   })
 
   it('is idempotent — repeated replacements do not add extra blank lines', () => {
-    const original = `<?php\n/*\nPlugin Name: Test\nVersion: 1.0.0\n*/\n\nif ( true ) {}\n`
-    const comment = `/*\nPlugin Name: Test\nVersion: 2.0.0\n*/\n`
+    const original = `<?php\n/*\n * Plugin Name: Test\n * Version: 1.0.0\n */\n\nif ( true ) {}\n`
+    const comment = `/*\n * Plugin Name: Test\n * Version: 2.0.0\n */\n`
 
     const first = replaceComment(original, comment)!
     const second = replaceComment(first, comment)!

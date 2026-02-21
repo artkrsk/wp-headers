@@ -153,7 +153,7 @@ describe('wpPluginHeader + buildComment (plugin PHP header)', () => {
     const lines = result.split('\n')
     const fieldOrder = lines
       .filter((l) => l.includes(':'))
-      .map((l) => l.split(':')[0].trim())
+      .map((l) => l.split(':')[0].replace(/^\s*\*\s*/, '').trim())
 
     expect(fieldOrder).toEqual([
       'Plugin Name',
